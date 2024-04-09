@@ -218,7 +218,9 @@ async def _(event: MessageEvent):
                 " ", ""
             )  # 去除消息中的空格, 不知道为什么, 如果消息中存在空格, 这个 api 大概率会返回空字符
             logger.debug("传入的信息为{}".format(msg))
-            xiaoai_url = f"https://xiaoapi.cn/API/lt_xiaoai.php?type=json&msg={msg}"
+            xiaoai_url = (
+                f"https://api.apibug.com/api/xiaoai/?msg={msg}&ApiKey={xiaoai_apikey}"
+            )
             message, voice = await xiaoice_reply(xiaoai_url)
             if api_num == 1:
                 logger.info("来自小爱同学的智能回复: " + message)

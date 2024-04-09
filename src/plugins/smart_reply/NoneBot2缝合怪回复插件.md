@@ -16,10 +16,11 @@
 | BAN_CD_TIME | int | 21600 | 当有人骂了 bot 时的屏蔽时间(秒) |
 | BOT_NICKNAME | str | 脑积水 | bot 的昵称 |
 | BOT_MASTER | str | (๑•小丫头片子•๑) | bot 主人的昵称 |
+| xiaoai_apikey | str | None | 小爱同学 apikey, [注册账号后获取](https://api.apibug.com/doc/xiaoai.html) |
 
 ### 小爱同学 apiKey 的申请步骤:
 
-    1. 进入网页 https://apibug.cn/doc/xiaoai.html
+    1. 进入网页 https://api.apibug.com/doc/xiaoai.html
     2. 右上角注册登录
     3. 左边接口列表
     4. 找到"小爱同学AI"零元购买

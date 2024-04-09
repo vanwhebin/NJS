@@ -44,6 +44,12 @@ try:
     )  # bot的主人名称,也可以换成你自己的
 except:
     Bot_MASTER: str = "(๑•小丫头片子•๑)"
+try:
+    xiaoai_apikey: str = (
+        nonebot.get_driver().config.xiaoai_apikey
+    )  # bot的主人名称,也可以换成你自己的
+except:
+    xiaoai_apikey: str = None
 
 
 """ban 使用的 json 工具"""
@@ -180,7 +186,7 @@ async def xiaoice_reply(url):
     async with AsyncClient() as client:
         res = (await client.get(url)).json()
         if res["code"] == 200:
-            return (res["data"]["txt"]).replace("小爱", Bot_NICKNAME), res["data"][
+            return (res["data"]["text"]).replace("小爱", Bot_NICKNAME), res["mp3"][
                 "tts"
             ]
         else:
