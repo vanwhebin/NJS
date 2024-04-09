@@ -72,8 +72,8 @@ def drawing(gid: str, uid: str, theme: str, spec_path: Optional[str] = None) -> 
     font_length = ttfront.getbbox(title)
     draw.text(
         (
-            image_font_center[0] - font_length[0] / 2 - 70,
-            image_font_center[1] - font_length[1] / 2 - 20,
+            image_font_center[0] - (font_length[2] - font_length[0]) / 2,
+            image_font_center[1] - (font_length[3] - font_length[1]) / 2,
         ),
         title,
         fill=color,
