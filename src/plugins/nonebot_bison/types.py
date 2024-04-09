@@ -1,9 +1,10 @@
-from dataclasses import dataclass
 from datetime import time
-from typing import Any, Literal, NamedTuple, NewType
+from dataclasses import dataclass
+from typing import Any, Literal, NewType, NamedTuple
 
 from httpx import URL
 from pydantic import BaseModel
+from nonebot_plugin_saa import PlatformTarget as SendTarget
 
 RawPost = Any
 Target = NewType("Target", str)
@@ -25,7 +26,7 @@ class PlatformTarget:
 
 
 class UserSubInfo(NamedTuple):
-    user: User
+    user: SendTarget
     categories: list[Category]
     tags: list[Tag]
 
@@ -52,3 +53,8 @@ class ApiError(Exception):
     def __init__(self, url: URL) -> None:
         msg = f"api {url} error"
         super().__init__(msg)
+
+
+class SubUnit(NamedTuple):
+    sub_target: Target
+    user_sub_infos: list[UserSubInfo]

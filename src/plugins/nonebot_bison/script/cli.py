@@ -1,21 +1,24 @@
-import importlib
 import json
 import time
-from functools import partial, wraps
+import importlib
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Callable, Coroutine, TypeVar
+from typing import Any, TypeVar
+from functools import wraps, partial
+from collections.abc import Callable, Coroutine
 
 from nonebot.log import logger
+from nonebot.compat import model_dump
 
-from ..config.subs_io import nbesf_parser, subscribes_export, subscribes_import
-from ..config.subs_io.nbesf_model import SubGroup
 from ..scheduler.manager import init_scheduler
+from ..config.subs_io.nbesf_model import v1, v2
+from ..config.subs_io import subscribes_export, subscribes_import
 
 try:
+    from typing_extensions import ParamSpec
+
     import anyio
     import click
-    from typing_extensions import ParamSpec
 except ImportError as e:  # pragma: no cover
     raise ImportError("请使用 `pip install nonebot-bison[cli]` 安装所需依赖") from e
 
@@ -65,9 +68,7 @@ def path_init(ctx, param, value):
 
 
 @cli.command(help="导出Nonebot Bison Exchangable Subcribes File", name="export")
-@click.option(
-    "--path", "-p", default=None, callback=path_init, help="导出路径,  如果不指定，则默认为工作目录"
-)
+@click.option("--path", "-p", default=None, callback=path_init, help="导出路径,  如果不指定，则默认为工作目录")
 @click.option(
     "--format",
     default="json",
@@ -76,13 +77,12 @@ def path_init(ctx, param, value):
 )
 @run_async
 async def subs_export(path: Path, format: str):
-
     await init_scheduler()
 
     export_file = path / f"bison_subscribes_export_{int(time.time())}.{format}"
 
     logger.info("正在获取订阅信息...")
-    export_data: SubGroup = await subscribes_export(lambda x: x)
+    export_data: v2.SubGroup = await subscribes_export(lambda x: x)
 
     with export_file.open("w", encoding="utf-8") as f:
         match format:
@@ -90,12 +90,20 @@ async def subs_export(path: Path, format: str):
                 logger.info("正在导出为yaml...")
 
                 pyyaml = import_yaml_module()
-                pyyaml.safe_dump(export_data.dict(), f, sort_keys=False)
+                # 由于 nbesf v2 中的user_target使用了AllSupportedPlatformTarget, 因此不能使用safe_dump
+                # 下文引自 https://pyyaml.org/wiki/PyYAMLDocumentation
+                # safe_dump(data, stream=None) serializes the given Python object into the stream.
+                # If stream is None, it returns the produced stream.
+                # safe_dump produces only standard YAML tags and cannot represent an arbitrary Python object.
+                # 进行以下曲线救国方案
+                json_data = json.dumps(model_dump(export_data), ensure_ascii=False)
+                yaml_data = pyyaml.safe_load(json_data)
+                pyyaml.safe_dump(yaml_data, f, sort_keys=False)
 
             case "json":
                 logger.info("正在导出为json...")
 
-                json.dump(export_data.dict(), f, indent=4, ensure_ascii=False)
+                json.dump(model_dump(export_data), f, indent=4, ensure_ascii=False)
 
             case _:
                 raise click.BadParameter(message=f"不支持的导出格式: {format}")
@@ -113,7 +121,6 @@ async def subs_export(path: Path, format: str):
 )
 @run_async
 async def subs_import(path: str, format: str):
-
     await init_scheduler()
 
     import_file_path = Path(path)
@@ -135,7 +142,17 @@ async def subs_import(path: str, format: str):
             case _:
                 raise click.BadParameter(message=f"不支持的导入格式: {format}")
 
-        nbesf_data = nbesf_parser(import_items)
+        assert isinstance(import_items, dict)
+        ver = int(import_items.get("version", 0))
+        logger.info(f"NBESF版本: {ver}")
+        match ver:
+            case 1:
+                nbesf_data = v1.nbesf_parser(import_items)
+            case 2:
+                nbesf_data = v2.nbesf_parser(import_items)
+            case _:
+                raise NotImplementedError("不支持的NBESF版本")
+
         await subscribes_import(nbesf_data)
 
 
