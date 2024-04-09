@@ -823,6 +823,27 @@ requests = ">=2.23.0"
 rich = "*"
 
 [[package]]
+name = "cookit"
+version = "0.4.1"
+description = "A toolkit for self use."
+optional = false
+python-versions = "<4.0,>=3.9"
+files = [
+    {file = "cookit-0.4.1-py3-none-any.whl", hash = "sha256:5d47c48676a418dc15e31bc43aa2ec0977e9d017375a857dd50d3c220f0fe785"},
+    {file = "cookit-0.4.1.tar.gz", hash = "sha256:ec9c666b9c6bbe6349a117e9d637907e1627e45cd91d0bd75b0a4aadc33cffbe"},
+]
+
+[package.dependencies]
+typing-extensions = ">=4.10.0"
+
+[package.extras]
+all = ["cookit[nonebot]", "cookit[pydantic]"]
+nonebot = ["cookit[nonebot-alconna]"]
+nonebot-alconna = ["cookit[nonebot-base]", "nonebot-plugin-alconna (>=0.40.1)"]
+nonebot-base = ["nonebot2 (>=2.2.0)"]
+pydantic = ["pydantic (>=1.10.0,!=2.5.0,!=2.5.1,<3.0.0)"]
+
+[[package]]
 name = "cssselect"
 version = "1.2.0"
 description = "cssselect parses CSS3 Selectors and translates them to XPath 1.0"
@@ -5700,4 +5721,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "7180dea2480393d16bc9cae9b452730b6c21d11e822d934c96ef1e4137265f68"
+content-hash = "d3e7b75c673e554c4f57063e37ad312b0b014bdf8756ed9cd5105f576e107044"
