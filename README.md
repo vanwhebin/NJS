@@ -231,7 +231,7 @@ poetry install
 
 ### 9️⃣ 登录 脑积水
 
-⚠️ 由于 TX 风控, 以下登录方法**可能**无法正常使用, 请留意 [go-cqhttp 仓库 Issue](https://github.com/Mrs4s/go-cqhttp/issues) 和 [go-cqhttp 插件仓库 Issue](https://github.com/mnixry/nonebot-plugin-gocqhttp/issues) 。
+⚠️ 由于 TX 风控, 以下登录方法**可能**无法正常使用。
 
 ⚠️ **推荐的项目:**
 ```
@@ -239,87 +239,10 @@ LagrangeDev/Lagrange.Core
 2891954521/LiteLoaderQQNT-OneBotApi-JS
 linyuchen/LiteLoaderQQNT-OneBotApi
 whitechi73/OpenShamrock
+Mrs4s/go-cqhttp
 ```
 
-1、在 NJS 目录中, 输入 `poetry run nb run` 或 `poetry run python bot.py` 来运行脑积水。首次启动较慢, 耐心等待。
-
-如果出现类似下图所示报错, 是因为 hikari_bot 插件的 API_TOKEN 和 nonebot_plugin_bing_chat 的 cookies 未配置造成的, 可以直接**忽略**或根据步骤 7 的第 3 步中的说明获取。但这并**不影响**其它插件的使用, 如果不需要这个插件, 可以去 `NJS\src\plugins\hikari_bot` 和 `NJS\src\plugins\nonebot_plugin_bing_chat` 目录中将 **_\_init__.py** 文件重命名为 **init__.py**。
-
-![image](https://user-images.githubusercontent.com/66541860/213744555-c22c8289-3789-4281-9781-5e372c5c3017.png)
-![image](https://user-images.githubusercontent.com/66541860/227728475-d85df47f-5e48-4c90-97f9-282c0c57aaa4.png)
-![image](https://user-images.githubusercontent.com/66541860/227728502-4da142d3-e9db-4a90-b049-906fc6f2d434.png)
-
-2、启动后, 浏览器访问链接 [http://127.0.0.1:13579/go-cqhttp](http://127.0.0.1:13579/go-cqhttp), 添加账号, 手动输入账号, 密码**不需要**输入, 设备选择 aPad 或 iPad, 如果你选择 Android, 那么你的安卓手机上将无法登录, 同理其它也是。
-
-![image](https://user-images.githubusercontent.com/66541860/213741470-5392694c-1141-447c-89f9-4c77b60c6e88.png)
-
-3、点击启动, 然后等待二维码绘制完成后点击显示二维码, 用机器人 QQ 号扫描二维码登录。
-
-![image](https://user-images.githubusercontent.com/66541860/213741988-2faa1052-f52e-4d93-a94a-02af39569d8b.png)
-
-<details>
-<summary>4、<b>如果</b>服务器与手机不在同一网络下, 登录提示<b>复杂的网络环境</b>, 展开本条步骤查看解决办法。</summary>
-  <pre><p>
-  1、进入 `.\NJS\accounts\binary` 目录, 复制 binary 目录下的 go-cqhttp.exe(Linux 版没有扩展名) 文件到自己的电脑。
-  2、双击运行, 在之后弹出的对话框中均点击确定(Linux 版无需此步骤)。
-  <a><img src="https://user-images.githubusercontent.com/66541860/213905405-c1c39bf5-9e52-46ad-96d6-62a56d097bca.png"></a>
-  3、运行 go-cqhttp.bat 文件(Linux 运行 go-cqhttp), 输入 3 选择<b>反向 Websocket 通信</b>。
-  <a><img src="https://user-images.githubusercontent.com/66541860/227727773-83cea251-478d-4022-b0a9-596084e044d3.png"></a>
-  4、打开 config.yml 文件, 将 uin 改为<b>机器人</b>的账号, 最下方的 universal 部分改为 <code>"ws://127.0.0.1:13579/onebot/v11/ws"</code>, 保存。
-  <a><img src="https://user-images.githubusercontent.com/66541860/213905588-344e85e4-0db6-4b44-b57c-a1f7ddb4824d.png"></a>
-  <a><img src="https://user-images.githubusercontent.com/66541860/213905671-d6e63b62-39d7-4862-8923-ff4fdfa2db93.png"></a>
-  5、此时再次运行 go-cqhttp.bat 文件(Linux 运行 go-cqhttp), 使用手机扫码登录。
-  6、登录好后将 device.json 和 session.token 文件复制到 .\NJS\accounts\uin(机器人的QQ号) 目录即可。
-  </p></pre>
-</details>
-
-<details>
-<summary>5、<b>如果</b>服务器与手机在同一网络下, 登录提示<b>账号被冻结</b>, 展开本条步骤查看解决办法。</summary>
-  <pre><p>
-  1、更换登录协议重试(优先 aPad 或 iPad, 其它协议可能导致部分信息无法处理)。
-  2、如果更换登录协议无法解决, 进入 `.\NJS\accounts\binary` 目录, 运行 binary 目录下的 go-cqhttp.exe(Linux 版没有扩展名)。
-  3、在弹出的对话框中均点击确定(Linux 版无需此步骤), 之后运行 go-cqhttp.bat(Linux 运行 go-cqhttp), 输入 3 选择<b>反向 Websocket 通信</b>。
-  <a><img src="https://user-images.githubusercontent.com/66541860/213905405-c1c39bf5-9e52-46ad-96d6-62a56d097bca.png"></a>
-  <a><img src="https://user-images.githubusercontent.com/66541860/227727773-83cea251-478d-4022-b0a9-596084e044d3.png"></a>
-  4、打开 config.yml 文件, 将 uin 改为<b>机器人</b>的账号, password 填写机器人账号密码, 最下方的 universal 部分改为 <code>"ws://127.0.0.1:13579/onebot/v11/ws"</code>, 保存。
-  <a><img src="https://user-images.githubusercontent.com/66541860/227727909-476bbfbb-9801-4314-b05c-ea16c23356af.png"></a>
-  <a><img src="https://user-images.githubusercontent.com/66541860/213905671-d6e63b62-39d7-4862-8923-ff4fdfa2db93.png"></a>
-  5、此时再次运行 go-cqhttp.bat 文件(Linux 运行 go-cqhttp), 按照提示输入 1 自动获取 ticket, 如开启了设备锁, 输入 1 选择<b>短信验证</b>。
-  <a><img src="https://user-images.githubusercontent.com/66541860/227727962-943f121d-4d8d-4708-a3ae-d981670997a8.png"></a>
-  6、登录好后将 device.json 和 session.token 文件复制到 .\NJS\accounts\uin(机器人的QQ号) 目录即可。
-  </p></pre>
-</details>
-
-<details>
-<summary>6、<b>如果</b>出现 code: 45, 登录提示<b>账号被冻结</b>, 展开本条步骤查看解决办法。</summary>
-  <pre><p>
-  <b>I: Windows 端: </b>
-  1、克隆或下载该仓库 <a href="https://github.com/rhwong/unidbg-fetch-qsign-onekey">unidbg-fetch-qsign-onekey</a>。
-  2、双击运行 Start_Qsign.bat , 也可以直接右键 Qsign_Monitor.ps1 使用 powershell 运行, 这个脚本用来检测 qsign 是否掉线, 若掉线则重新运行。
-  注意: 这个脚本目前存在 bug 不好用: 无法准确检测是否掉线, 会导致 qsign 重复运行。 但由于 qsign 特性, 重复运行后检测到端口冲突会自己关闭, 如此往复, 会占用服务器资源, 影响性能, 不建议使用。
-  3、txlib_version 目前选择默认的 8.9.63 即可, (该部分具有时效性, 此教程写于 2023年7月24日 10点45分, 如果想要更新版本, 将在同目录下生成的 txlib_version.json 删除重新配置即可)。 
-  4、host 保持默认 127.0.0.1 , port 不可以选择默认(脑积水也是这个端口), 请填写 24680, 你喜欢其它数字也可以(≧∇≦)ﾉ 
-  注意: (如果脑积水和 qsign 不在同一服务器上, 请按需填写)。
-  5、key 填写 <b>114514</b> , 注意这里填写<b>114514</b> (qsign 的作者填写的是 114514, 但是一键包的作者却改成了 1145141919810)。 
-  <a><img src="https://github.com/zhulinyv/NJS/assets/66541860/bbf874ac-dd12-475e-8984-06e42e776563"></a>
-  6、打开 <b>./NJS/accounts/你的脑积水的 QQ 号/config-template.yml</b> 文件在 account 下(如图所示选中部分)填写 <b>sign-server: 'http://127.0.0.1:24680'</b>
-  <a><img src="https://github.com/zhulinyv/NJS/assets/66541860/b05f6672-b5a0-4e5b-817c-19ba1f6c0013"></a>
-  <hr>
-  <b>II: 其它服务端: 看这里~!!</b>
-  <a href="https://github.com/fuqiuluo/unidbg-fetch-qsign/wiki">unidbg-fetch-qsign wiki</a>
-  <a href="https://github.com/fuqiuluo/unidbg-fetch-qsign/wiki/%E9%83%A8%E7%BD%B2%E5%9C%A8Linux"><b>→ Linux 直达 ←</b></a>
-  <a href="https://github.com/fuqiuluo/unidbg-fetch-qsign/wiki/%E9%83%A8%E7%BD%B2%E5%9C%A8Windows"><b>→ Windows 直达 ←</b></a>
-  <a href="https://github.com/fuqiuluo/unidbg-fetch-qsign/wiki/"><b>→ Android 回家 ←</b></a>
-  <a href="https://github.com/fuqiuluo/unidbg-fetch-qsign/wiki/%E9%83%A8%E7%BD%B2%E5%9C%A8Docker"><b>→ Docker 直达 ←</b></a>
-  <hr>
-  <b>III: 注意</b>
-  1、使用 Windows 一键端需要使用<a href="https://github.com/Mrs4s/go-cqhttp/actions/runs/5504923059"> dev 分支下的 go-cqhttp</a>(可能需要登录 GitHub 才可以下载)。
-  2、若服务器性能太低, 使用 qsign 服务器出现超时问题, 可以自行修改 go-cqhttp 源代码延长超时时间并进行编译。如果你不会 Go 语言或编译, 可以在本地部署 qsign 并成功登录后上传 device.json 和 session.token 文件复制到 .\NJS\accounts\uin(机器人的QQ号) 目录即可。
-  <hr>
-  unidbg-fetch-qsign wiki 截图。
-  <a><img src="https://github.com/zhulinyv/NJS/assets/66541860/bd9b1ed8-d252-4847-8aa2-7a3ab3b8760f"></a>
-  </p></pre>
-</details>
+推荐教程: [https://llonebot.github.io/zh-CN/guide/configuration](https://llonebot.github.io/zh-CN/guide/configuration)
 
 ### 🔟 使用 脑积水
 
