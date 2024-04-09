@@ -27,7 +27,7 @@ try:
         nonebot.get_driver().config.api_num
     )  # 这个值为1时, 使用的是小爱同学模式1
 except:
-    api_num: int = 1
+    api_num: int = 2
 try:
     ban_cd_time: int = nonebot.get_driver().config.ban_cd_time  # ban 冷却时间
 except:
