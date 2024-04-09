@@ -1,43 +1,54 @@
-﻿import os
-import re
-import base64
+﻿import base64
+import os
 import random
+import re
+from pathlib import Path
+from re import findall
+
 import nonebot
 import ujson as json
-from re import findall
-from pathlib import Path
-from loguru import logger
 from httpx import AsyncClient
-
+from loguru import logger
 
 try:
-    ban_data_path: str = nonebot.get_driver().config.ban_data_path   # 记录 ban 冷却时间的路径
+    ban_data_path: str = (
+        nonebot.get_driver().config.ban_data_path
+    )  # 记录 ban 冷却时间的路径
 except:
     ban_data_path: str = "./data/ban_CD"
 try:
-    setu_flag: bool = nonebot.get_driver().config.setu_api           # 这个值为True时, 使用的是 MirlKoi 图片
+    setu_flag: bool = (
+        nonebot.get_driver().config.setu_api
+    )  # 这个值为True时, 使用的是 MirlKoi 图片
 except:
     setu_flag: bool = True
 try:
-    api_num: int = nonebot.get_driver().config.api_num               # 这个值为1时, 使用的是小爱同学模式1
+    api_num: int = (
+        nonebot.get_driver().config.api_num
+    )  # 这个值为1时, 使用的是小爱同学模式1
 except:
-    api_num: int = 2
+    api_num: int = 1
 try:
-    ban_cd_time: int = nonebot.get_driver().config.ban_cd_time       # ban 冷却时间
+    ban_cd_time: int = nonebot.get_driver().config.ban_cd_time  # ban 冷却时间
 except:
     ban_cd_time: int = 21600
 try:
-    Bot_NICKNAME: str = nonebot.get_driver().config.bot_nickname     # bot的nickname,可以换成你自己的
+    Bot_NICKNAME: str = (
+        nonebot.get_driver().config.bot_nickname
+    )  # bot的nickname,可以换成你自己的
 except:
     Bot_NICKNAME: str = "脑积水"
 try:
-    Bot_MASTER: str = nonebot.get_driver().config.bot_master         # bot的主人名称,也可以换成你自己的
+    Bot_MASTER: str = (
+        nonebot.get_driver().config.bot_master
+    )  # bot的主人名称,也可以换成你自己的
 except:
     Bot_MASTER: str = "(๑•小丫头片子•๑)"
 
 
-
 """ban 使用的 json 工具"""
+
+
 # read_json的工具函数
 def read_json_ban() -> dict:
     try:
@@ -48,18 +59,23 @@ def read_json_ban() -> dict:
     except FileNotFoundError:
         try:
             import os
+
             os.makedirs(ban_data_path)
         except FileExistsError:
             pass
         with open(ban_data_path + "usercd.json", mode="w") as f_out:
             json.dump({}, f_out)
         return {}
+
+
 # write_json的工具函数
 def write_json_ban(qid: str, time: int, mid: int, data: dict):
     data[qid] = [time, mid]
     with open(ban_data_path + "usercd.json", "w") as f_out:
         json.dump(data, f_out)
         f_out.close()
+
+
 # remove_json的工具函数
 def remove_json_ban(qid: str):
     with open(ban_data_path + "usercd.json", "r") as f_in:
@@ -69,7 +85,6 @@ def remove_json_ban(qid: str):
     with open(ban_data_path + "usercd.json", "w") as f_out:
         json.dump(data, f_out)
         f_out.close()
-
 
 
 # ban人提示语
@@ -82,18 +97,26 @@ attack_sendmessage = [
 ]
 
 
-
 # 载入词库(这个词库有点涩)
-AnimeThesaurus = json.load(open(Path(os.path.join(os.path.dirname(
-    __file__), "resource/json")) / "data.json", "r", encoding="utf8"))
-LeafThesaurus = json.load(open(Path(os.path.join(os.path.dirname(
-    __file__), "resource/json")) / "leaf.json", "r", encoding="utf8"))
+AnimeThesaurus = json.load(
+    open(
+        Path(os.path.join(os.path.dirname(__file__), "resource/json")) / "data.json",
+        "r",
+        encoding="utf8",
+    )
+)
+LeafThesaurus = json.load(
+    open(
+        Path(os.path.join(os.path.dirname(__file__), "resource/json")) / "leaf.json",
+        "r",
+        encoding="utf8",
+    )
+)
 
 
 # 获取resource/audio下面的全部文件
 aac_file_path = os.path.join(os.path.dirname(__file__), "resource/audio")
 aac_file_list = os.listdir(aac_file_path)
-
 
 
 # hello之类的回复
@@ -107,7 +130,6 @@ hello__reply = [
 ]
 
 
-
 # 从字典里返还消息, 抄(借鉴)的zhenxun-bot
 async def get_chat_result1(text: str, nickname: str) -> str:
     if len(text) < 7:
@@ -115,6 +137,8 @@ async def get_chat_result1(text: str, nickname: str) -> str:
         for key in keys:
             if text.find(key) != -1:
                 return random.choice(AnimeThesaurus[key]).replace("你", nickname)
+
+
 async def get_chat_result2(text: str, nickname: str) -> str:
     if len(text) < 7:
         keys = LeafThesaurus.keys()
@@ -128,12 +152,27 @@ async def qinyun_reply(url):
     async with AsyncClient() as client:
         response = await client.get(url)
         # 这个api好像问道主人或者他叫什么名字会返回私活,这里replace掉部分
-        res = response.json()["content"].replace("林欣", Bot_MASTER).replace("{br}", "\n").replace("贾彦娟", Bot_MASTER).replace("周超辉", Bot_MASTER).replace("鑫总", Bot_MASTER).replace("张鑫", Bot_MASTER).replace("菲菲", Bot_NICKNAME).replace("dn", Bot_MASTER).replace("1938877131", "2749903559").replace("小燕", Bot_NICKNAME).replace("琪琪", Bot_NICKNAME).replace("无敌小攻", Bot_NICKNAME).replace("廖婕羽", Bot_MASTER).replace("张疯疯", Bot_NICKNAME)
-        res = re.sub(u"\\{.*?\\}", "", res)
+        res = (
+            response.json()["content"]
+            .replace("林欣", Bot_MASTER)
+            .replace("{br}", "\n")
+            .replace("贾彦娟", Bot_MASTER)
+            .replace("周超辉", Bot_MASTER)
+            .replace("鑫总", Bot_MASTER)
+            .replace("张鑫", Bot_MASTER)
+            .replace("菲菲", Bot_NICKNAME)
+            .replace("dn", Bot_MASTER)
+            .replace("1938877131", "2749903559")
+            .replace("小燕", Bot_NICKNAME)
+            .replace("琪琪", Bot_NICKNAME)
+            .replace("无敌小攻", Bot_NICKNAME)
+            .replace("廖婕羽", Bot_MASTER)
+            .replace("张疯疯", Bot_NICKNAME)
+        )
+        res = re.sub("\\{.*?\\}", "", res)
         if "taobao" in res:
             res = Bot_NICKNAME + "暂时听不懂主人说的话呢"
         return res
-
 
 
 # 从小爱同学api拿到消息, 这个api私货比较少
@@ -141,10 +180,11 @@ async def xiaoice_reply(url):
     async with AsyncClient() as client:
         res = (await client.get(url)).json()
         if res["code"] == 200:
-            return (res["data"]["txt"]).replace("小爱", Bot_NICKNAME), res["data"]["tts"]
+            return (res["data"]["txt"]).replace("小爱", Bot_NICKNAME), res["data"][
+                "tts"
+            ]
         else:
             return "寄"
-
 
 
 # 获取涩图(P站)
@@ -175,6 +215,8 @@ async def get_setu() -> list:
                 + setu_author
             )
         return [pic, data, setu_url]
+
+
 async def down_pic(url):
     async with AsyncClient() as client:
         headers = {
@@ -189,11 +231,12 @@ async def down_pic(url):
         else:
             logger.error(f"获取图片失败: {re.status_code}")
             return re.status_code
+
+
 def convert_b64(content) -> str:
     ba = str(base64.b64encode(content))
     pic = findall(r"\'([^\"]*)\'", ba)[0].replace("'", "")
     return pic
-
 
 
 # 戳一戳消息
@@ -226,9 +269,8 @@ poke_reply = [
 ]
 
 
-
 # 藏话
-curse=[
+curse = [
     "nm",
     "色批",
     "泥马",
@@ -644,8 +686,8 @@ curse=[
     "臭表",
     "没有🐴",
     "沙比",
-    "甚麼寄吧"]
-
+    "甚麼寄吧",
+]
 
 
 logo = """

@@ -14,7 +14,6 @@
 | BAN_DATA_PATH | str | "./data/ban_CD" | 存放被屏蔽用户 CD 时间，删掉可提前解除屏蔽 |
 | SETU_API | bool | True | 戳一戳图片默认使用的api, True 为 MirlKoi; False 为 Pixiv |
 | BAN_CD_TIME | int | 21600 | 当有人骂了 bot 时的屏蔽时间(秒) |
-| XIAOAI_APIKEY | str | 寄 | 小爱同学的 ApiKey (申请方式看下文) |
 | BOT_NICKNAME | str | 脑积水 | bot 的昵称 |
 | BOT_MASTER | str | (๑•小丫头片子•๑) | bot 主人的昵称 |
 
