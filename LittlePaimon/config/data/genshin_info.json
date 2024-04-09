@@ -2169,6 +2169,71 @@
     },
     "SideIconName": "UI_AvatarIcon_Side_Furina"
   },
+  "10000090": {
+    "SkillOrder": [
+      10901,
+      10902,
+      10905
+    ],
+    "Skills": {
+      "10901": "Skill_A_03",
+      "10902": "Skill_S_Chevreuse_01",
+      "10905": "Skill_E_Chevreuse_01"
+    },
+    "SideIconName": "UI_AvatarIcon_Side_Chevreuse"
+  },
+  "10000091": {
+    "SkillOrder": [
+      10911,
+      10912,
+      10915
+    ],
+    "Skills": {
+      "10911": "Skill_A_04",
+      "10912": "Skill_S_Navia_01",
+      "10915": "Skill_E_Navia_01"
+    },
+    "SideIconName": "UI_AvatarIcon_Side_Navia"
+  },
+  "10000092": {
+    "SkillOrder": [
+      10921,
+      10922,
+      10925
+    ],
+    "Skills": {
+      "10921": "Skill_A_04",
+      "10922": "Skill_S_Gaming_01",
+      "10925": "Skill_E_Gaming_01"
+    },
+    "SideIconName": "UI_AvatarIcon_Side_Gaming"
+  },
+  "10000093": {
+    "SkillOrder": [
+      10931,
+      10932,
+      10935
+    ],
+    "Skills": {
+      "10931": "Skill_A_Catalyst_MD",
+      "10932": "Skill_S_Liuyun_01",
+      "10935": "Skill_E_Liuyun_01"
+    },
+    "SideIconName": "UI_AvatarIcon_Side_Liuyun"
+  },
+  "10000094": {
+    "SkillOrder": [
+      10941,
+      10942,
+      10945
+    ],
+    "Skills": {
+      "10941": "Skill_A_01",
+      "10942": "Skill_S_Chiori_01",
+      "10945": "Skill_E_Chiori_01"
+    },
+    "SideIconName": "UI_AvatarIcon_Side_Chiori"
+  },
   "10000005-501": {
     "Element": "None",
     "Consts": [
