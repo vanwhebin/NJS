@@ -131,9 +131,24 @@ win32-setctime = "1.1.0"
 wordcloud = "1.8.2.2"
 
 [tool.nonebot]
-plugins = ["nonebot_plugin_guild_patch", "nonebot_bison"]
+plugins = ["nonebot_plugin_guild_patch"]
 plugin_dirs = ["src/plugins"]
 adapters = [{name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11", project_link = "nonebot-adapter-onebot", desc = "OneBot V11 协议"}]
+
+# https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html
+[tool.black]
+line-length = 500
+
+# https://beta.ruff.rs/docs/settings/
+[tool.ruff]
+line-length = 500
+# https://beta.ruff.rs/docs/rules/
+select = ["E", "W", "F"]
+ignore = ["F401"]
+# Exclude a variety of commonly ignored directories.
+respect-gitignore = true
+ignore-init-module-imports = true
+
 
 [build-system]
 requires = ["poetry-core"]

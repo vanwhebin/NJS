@@ -11,21 +11,15 @@ from httpx import AsyncClient
 from loguru import logger
 
 try:
-    ban_data_path: str = (
-        nonebot.get_driver().config.ban_data_path
-    )  # 记录 ban 冷却时间的路径
+    ban_data_path: str = nonebot.get_driver().config.ban_data_path  # 记录 ban 冷却时间的路径
 except:
     ban_data_path: str = "./data/ban_CD"
 try:
-    setu_flag: bool = (
-        nonebot.get_driver().config.setu_api
-    )  # 这个值为True时, 使用的是 MirlKoi 图片
+    setu_flag: bool = nonebot.get_driver().config.setu_api  # 这个值为True时, 使用的是 MirlKoi 图片
 except:
     setu_flag: bool = True
 try:
-    api_num: int = (
-        nonebot.get_driver().config.api_num
-    )  # 这个值为1时, 使用的是小爱同学模式1
+    api_num: int = nonebot.get_driver().config.api_num  # 这个值为1时, 使用的是小爱同学模式1
 except:
     api_num: int = 2
 try:
@@ -33,21 +27,15 @@ try:
 except:
     ban_cd_time: int = 21600
 try:
-    Bot_NICKNAME: str = (
-        nonebot.get_driver().config.bot_nickname
-    )  # bot的nickname,可以换成你自己的
+    Bot_NICKNAME: str = nonebot.get_driver().config.bot_nickname  # bot的nickname,可以换成你自己的
 except:
     Bot_NICKNAME: str = "脑积水"
 try:
-    Bot_MASTER: str = (
-        nonebot.get_driver().config.bot_master
-    )  # bot的主人名称,也可以换成你自己的
+    Bot_MASTER: str = nonebot.get_driver().config.bot_master  # bot的主人名称,也可以换成你自己的
 except:
     Bot_MASTER: str = "(๑•小丫头片子•๑)"
 try:
-    xiaoai_apikey: str = (
-        nonebot.get_driver().config.xiaoai_apikey
-    )  # bot的主人名称,也可以换成你自己的
+    xiaoai_apikey: str = nonebot.get_driver().config.xiaoai_apikey  # bot的主人名称,也可以换成你自己的
 except:
     xiaoai_apikey: str = None
 
@@ -158,23 +146,7 @@ async def qinyun_reply(url):
     async with AsyncClient() as client:
         response = await client.get(url)
         # 这个api好像问道主人或者他叫什么名字会返回私活,这里replace掉部分
-        res = (
-            response.json()["content"]
-            .replace("林欣", Bot_MASTER)
-            .replace("{br}", "\n")
-            .replace("贾彦娟", Bot_MASTER)
-            .replace("周超辉", Bot_MASTER)
-            .replace("鑫总", Bot_MASTER)
-            .replace("张鑫", Bot_MASTER)
-            .replace("菲菲", Bot_NICKNAME)
-            .replace("dn", Bot_MASTER)
-            .replace("1938877131", "2749903559")
-            .replace("小燕", Bot_NICKNAME)
-            .replace("琪琪", Bot_NICKNAME)
-            .replace("无敌小攻", Bot_NICKNAME)
-            .replace("廖婕羽", Bot_MASTER)
-            .replace("张疯疯", Bot_NICKNAME)
-        )
+        res = response.json()["content"].replace("林欣", Bot_MASTER).replace("{br}", "\n").replace("贾彦娟", Bot_MASTER).replace("周超辉", Bot_MASTER).replace("鑫总", Bot_MASTER).replace("张鑫", Bot_MASTER).replace("菲菲", Bot_NICKNAME).replace("dn", Bot_MASTER).replace("1938877131", "2749903559").replace("小燕", Bot_NICKNAME).replace("琪琪", Bot_NICKNAME).replace("无敌小攻", Bot_NICKNAME).replace("廖婕羽", Bot_MASTER).replace("张疯疯", Bot_NICKNAME)
         res = re.sub("\\{.*?\\}", "", res)
         if "taobao" in res:
             res = Bot_NICKNAME + "暂时听不懂主人说的话呢"
@@ -186,9 +158,7 @@ async def xiaoice_reply(url):
     async with AsyncClient() as client:
         res = (await client.get(url)).json()
         if res["code"] == 200:
-            return (res["data"]["text"]).replace("小爱", Bot_NICKNAME), res["mp3"][
-                "tts"
-            ]
+            return (res["data"]["text"]).replace("小爱", Bot_NICKNAME), res["mp3"]["tts"]
         else:
             return "寄"
 
@@ -212,14 +182,7 @@ async def get_setu() -> list:
         base64 = convert_b64(content)
         if type(base64) == str:
             pic = "[CQ:image,file=base64://" + base64 + "]"
-            data = (
-                "标题:"
-                + setu_title
-                + "\npid:"
-                + str(setu_pid)
-                + "\n画师:"
-                + setu_author
-            )
+            data = "标题:" + setu_title + "\npid:" + str(setu_pid) + "\n画师:" + setu_author
         return [pic, data, setu_url]
 
 
@@ -227,8 +190,7 @@ async def down_pic(url):
     async with AsyncClient() as client:
         headers = {
             "Referer": "https://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) " "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36",
         }
         re = await client.get(url=url, headers=headers, timeout=120)
         if re.status_code == 200:
