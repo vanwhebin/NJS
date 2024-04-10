@@ -131,7 +131,7 @@ win32-setctime = "1.1.0"
 wordcloud = "1.8.2.2"
 
 [tool.nonebot]
-plugins = ["nonebot_plugin_guild_patch"]
+plugins = ["nonebot_plugin_guild_patch", "nonebot_bison"]
 plugin_dirs = ["src/plugins"]
 adapters = [{name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11", project_link = "nonebot-adapter-onebot", desc = "OneBot V11 协议"}]
 
