@@ -1,31 +1,38 @@
 import re
 import traceback
-from typing import List, Union
+from typing import List, Optional, Type
 
-from nonebot import on_command, on_message, require
-from nonebot.adapters.onebot.v11 import Bot as V11Bot
-from nonebot.adapters.onebot.v11 import GroupMessageEvent as V11GMEvent
-from nonebot.adapters.onebot.v11 import Message as V11Msg
-from nonebot.adapters.onebot.v11 import MessageEvent as V11MEvent
-from nonebot.adapters.onebot.v11 import MessageSegment as V11MsgSeg
-from nonebot.adapters.onebot.v12 import Bot as V12Bot
-from nonebot.adapters.onebot.v12 import Message as V12Msg
-from nonebot.adapters.onebot.v12 import MessageEvent as V12MEvent
-from nonebot.adapters.onebot.v12 import MessageSegment as V12MsgSeg
+from nonebot import get_driver, require
+from nonebot.adapters import Bot, Event
 from nonebot.log import logger
-from nonebot.params import CommandArg, EventMessage, EventPlainText
+from nonebot.matcher import Matcher
 from nonebot.permission import SUPERUSER
-from nonebot.plugin import PluginMetadata
-from nonebot.rule import Rule, to_me
-from nonebot.typing import T_State
+from nonebot.plugin import PluginMetadata, inherit_supported_adapters
+from nonebot.rule import to_me
+from nonebot.typing import T_Handler
 
-require("nonebot_plugin_datastore")
+require("nonebot_plugin_orm")
+require("nonebot_plugin_alconna")
+require("nonebot_plugin_userinfo")
 require("nonebot_plugin_htmlrender")
 
-from nonebot_plugin_datastore.db import post_db_init
+from arclet.alconna import Field
+from nonebot_plugin_alconna import (
+    Alconna,
+    AlconnaMatcher,
+    Args,
+    At,
+    Image,
+    UniMessage,
+    on_alconna,
+)
+from nonebot_plugin_alconna.model import CompConfig
+from nonebot_plugin_userinfo import get_user_info
 
+from . import migrations
 from .config import Config
 from .manager import shindan_manager
+from .model import ShindanConfig
 from .shindanmaker import (
     download_image,
     get_shindan_title,
@@ -33,225 +40,180 @@ from .shindanmaker import (
     render_shindan_list,
 )
 
-post_db_init(shindan_manager.load_shindan_records)
-
 __plugin_meta__ = PluginMetadata(
     name="趣味占卜",
     description="使用ShindanMaker网站的趣味占卜",
     usage="发送“占卜列表”查看可用占卜\n发送“{占卜名} {名字}”使用占卜",
+    type="application",
+    homepage="https://github.com/noneplugin/nonebot-plugin-shindan",
     config=Config,
+    supported_adapters=inherit_supported_adapters(
+        "nonebot_plugin_alconna", "nonebot_plugin_userinfo"
+    ),
     extra={
-        "unique_name": "shindan",
         "example": "人设生成 小Q",
-        "author": "meetwq <meetwq@gmail.com>",
-        "version": "0.3.4",
+        "orm_version_location": migrations,
     },
 )
 
-add_usage = """Usage:
-添加占卜 {id} {指令}
-如：添加占卜 917962 人设生成"""
 
-del_usage = """Usage:
-删除占卜 {id}
-如：删除占卜 917962"""
+params = {"use_cmd_start": True, "block": True, "priority": 13}
 
-set_usage = """Usage:
-设置占卜 {id} {mode}
-设置占卜输出模式：'text' 或 'image'(默认)
-如：设置占卜 360578 text"""
+matcher_sd = on_alconna("占卜", rule=to_me(), **params)
+matcher_ls = on_alconna("占卜列表", aliases={"可用占卜"}, **params)
 
-cmd_sd = on_command(
-    "占卜", aliases={"shindan", "shindanmaker"}, rule=to_me(), block=True, priority=60
+comp_config = CompConfig(disables={"tab", "enter"}, timeout=60)
+params_config = {"permission": SUPERUSER, "comp_config": comp_config, **params}
+
+args_id = Args["id", int, Field(completion=lambda: "占卜id")]
+args_cmd = Args["command", str, Field(completion=lambda: "占卜指令")]
+args_mode = Args["mode", ["text", "image"], Field(completion=lambda: "占卜输出形式")]
+
+matcher_add = on_alconna(
+    Alconna("添加占卜", args_id, args_cmd),
+    **params_config,
 )
-cmd_ls = on_command("占卜列表", aliases={"可用占卜"}, block=True, priority=60)
-cmd_add = on_command("添加占卜", permission=SUPERUSER, block=True, priority=60)
-cmd_del = on_command("删除占卜", permission=SUPERUSER, block=True, priority=60)
-cmd_set = on_command("设置占卜", permission=SUPERUSER, block=True, priority=60)
+matcher_del = on_alconna(
+    Alconna("删除占卜", args_id),
+    **params_config,
+)
+matcher_set_cmd = on_alconna(
+    Alconna("设置占卜指令", args_id, args_cmd),
+    **params_config,
+)
+matcher_set_mode = on_alconna(
+    Alconna("设置占卜模式", args_id, args_mode),
+    **params_config,
+)
 
 
-@cmd_sd.handle()
-async def _():
-    await cmd_sd.finish(__plugin_meta__.usage)
+@matcher_sd.handle()
+async def _(matcher: Matcher):
+    await matcher.finish(__plugin_meta__.usage)
 
 
-@cmd_ls.handle()
-async def _(bot: Union[V11Bot, V12Bot]):
-    if not shindan_manager.shindan_records:
-        await cmd_ls.finish("尚未添加任何占卜")
+@matcher_ls.handle()
+async def _(matcher: Matcher):
+    if not shindan_manager.shindan_list:
+        await matcher.finish("尚未添加任何占卜")
 
-    img = await render_shindan_list(shindan_manager.shindan_records)
-
-    if isinstance(bot, V11Bot):
-        await cmd_ls.finish(V11MsgSeg.image(img))
-    elif isinstance(bot, V12Bot):
-        resp = await bot.upload_file(type="data", name="shindan", data=img)
-        file_id = resp["file_id"]
-        await cmd_ls.finish(V12MsgSeg.image(file_id))
+    img = await render_shindan_list(shindan_manager.shindan_list)
+    await UniMessage.image(raw=img).send()
 
 
-@cmd_add.handle()
-async def _(msg: Union[V11Msg, V12Msg] = CommandArg()):
-    arg = msg.extract_plain_text().strip()
-    if not arg:
-        await cmd_add.finish(add_usage)
+@matcher_add.handle()
+async def _(matcher: Matcher, id: int, command: str):
+    for shindan in shindan_manager.shindan_list:
+        if shindan.id == id:
+            await matcher.finish("该占卜已存在")
+        if shindan.command == command:
+            await matcher.finish("该指令已被使用")
 
-    args = arg.split()
-    if len(args) != 2 or not args[0].isdigit():
-        await cmd_add.finish(add_usage)
-
-    id = args[0]
-    command = args[1]
     title = await get_shindan_title(id)
     if not title:
-        await cmd_add.finish("找不到该占卜，请检查id")
+        await matcher.finish("找不到该占卜，请检查id")
 
-    if resp := await shindan_manager.add_shindan(id, command, title):
-        await cmd_add.finish(resp)
-    else:
-        await cmd_add.finish(f"成功添加占卜“{title}”，可通过“{command} 名字”使用")
-
-
-@cmd_del.handle()
-async def _(msg: Union[V11Msg, V12Msg] = CommandArg()):
-    arg = msg.extract_plain_text().strip()
-    if not arg:
-        await cmd_del.finish(del_usage)
-
-    if not arg.isdigit():
-        await cmd_del.finish(del_usage)
-
-    id = arg
-
-    if resp := await shindan_manager.remove_shindan(id):
-        await cmd_add.finish(resp)
-    else:
-        await cmd_del.finish("成功删除该占卜")
+    await shindan_manager.add_shindan(id, command, title)
+    refresh_matchers()
+    await matcher.finish(f"成功添加占卜“{title}”，可通过“{command} 名字”使用")
 
 
-@cmd_set.handle()
-async def _(msg: Union[V11Msg, V12Msg] = CommandArg()):
-    arg = msg.extract_plain_text().strip()
-    if not arg:
-        await cmd_set.finish(set_usage)
+@matcher_del.handle()
+async def _(matcher: Matcher, id: int):
+    if id not in (shindan.id for shindan in shindan_manager.shindan_list):
+        await matcher.finish("尚未添加该占卜")
 
-    args = arg.split()
-    if len(args) != 2 or not args[0].isdigit() or args[1] not in ["text", "image"]:
-        await cmd_set.finish(set_usage)
-
-    id = args[0]
-    mode = args[1]
-
-    if resp := await shindan_manager.set_shindan_mode(id, mode):
-        await cmd_add.finish(resp)
-    else:
-        await cmd_set.finish("设置成功")
+    await shindan_manager.remove_shindan(id)
+    refresh_matchers()
+    await matcher.finish("成功删除该占卜")
 
 
-def sd_handler() -> Rule:
-    async def handle(
-        bot: Union[V11Bot, V12Bot],
-        event: Union[V11MEvent, V12MEvent],
-        state: T_State,
-        msg: Union[V11Msg, V12Msg] = EventMessage(),
-        msg_text: str = EventPlainText(),
-    ) -> bool:
-        async def get_name(command: str) -> str:
-            name = ""
-            if isinstance(bot, V11Bot):
-                assert isinstance(event, V11MEvent)
-                for msg_seg in msg:
-                    if msg_seg.type == "at":
-                        assert isinstance(event, V11GMEvent)
-                        info = await bot.get_group_member_info(
-                            group_id=event.group_id, user_id=msg_seg.data["qq"]
-                        )
-                        name = info.get("card", "") or info.get("nickname", "")
-                        break
-                if not name:
-                    name = msg_text[len(command) :].strip()
-                if not name:
-                    name = event.sender.card or event.sender.nickname
-            elif isinstance(bot, V12Bot):
-                assert isinstance(event, V12MEvent)
+@matcher_set_cmd.handle()
+async def _(matcher: Matcher, id: int, command: str):
+    if id not in (shindan.id for shindan in shindan_manager.shindan_list):
+        await matcher.finish("尚未添加该占卜")
 
-                async def get_user_name(user_id: str):
-                    resp = await bot.get_user_info(user_id=user_id)
-                    return resp["user_displayname"] or resp["user_name"]
+    await shindan_manager.set_shindan(id, command=command)
+    refresh_matchers()
+    await matcher.finish("设置成功")
 
-                for msg_seg in msg:
-                    if msg_seg.type == "mention":
-                        name = await get_user_name(msg_seg.data["user_id"])
-                        break
-                if not name:
-                    name = msg_text[len(command) :].strip()
-                if not name:
-                    name = await get_user_name(event.user_id)
 
-            return name or ""
+@matcher_set_mode.handle()
+async def _(matcher: Matcher, id: int, mode: str):
+    if id not in (shindan.id for shindan in shindan_manager.shindan_list):
+        await matcher.finish("尚未添加该占卜")
 
-        for record in sorted(
-            shindan_manager.shindan_records,
-            reverse=True,
-            key=lambda record: record.command,
+    await shindan_manager.set_shindan(id, mode=mode)
+    refresh_matchers()
+    await matcher.finish("设置成功")
+
+
+def shindan_handler(shindan: ShindanConfig) -> T_Handler:
+    async def handler(
+        bot: Bot,
+        event: Event,
+        matcher: Matcher,
+        name: Optional[str] = None,
+        at: Optional[At] = None,
+    ):
+        if at and (user_info := await get_user_info(bot, event, at.target)):
+            name = user_info.user_displayname or user_info.user_name
+
+        if not name and (
+            user_info := await get_user_info(bot, event, event.get_user_id())
         ):
-            if msg_text.startswith(record.command):
-                name = await get_name(record.command)
-                state["id"] = record.shindan_id
-                state["name"] = name
-                state["mode"] = record.mode
-                return True
-        return False
+            name = user_info.user_displayname or user_info.user_name
 
-    return Rule(handle)
+        if name is None:
+            await matcher.finish("无法获取名字，请加上名字再试")
+
+        try:
+            res = await make_shindan(shindan.id, name, shindan.mode)
+        except Exception:
+            logger.warning(traceback.format_exc())
+            await matcher.finish("出错了，请稍后再试")
+
+        msg = UniMessage()
+        if isinstance(res, str):
+            img_pattern = r"((?:http|https)://\S+\.(?:jpg|jpeg|png|gif|bmp|webp))"
+            for text in re.split(img_pattern, res):
+                if re.match(img_pattern, text):
+                    try:
+                        img = await download_image(text)
+                        msg += Image(raw=img)
+                    except Exception:
+                        logger.warning(f"{text} 下载出错！")
+                else:
+                    msg += text
+        else:
+            msg += Image(raw=res)
+        await msg.send()
+
+    return handler
 
 
-sd_matcher = on_message(sd_handler(), priority=13)
+shindan_matchers: List[Type[AlconnaMatcher]] = []
 
 
-@sd_matcher.handle()
-async def _(bot: Union[V11Bot, V12Bot], state: T_State):
-    id: str = state["id"]
-    name: str = state["name"]
-    mode: str = state["mode"]
-    try:
-        res = await make_shindan(id, name, mode)
-    except:
-        logger.warning(traceback.format_exc())
-        await sd_matcher.finish("出错了，请稍后再试")
+def refresh_matchers():
+    for matcher in shindan_matchers:
+        matcher.destroy()
+    shindan_matchers.clear()
 
-    msgs: List[Union[str, bytes]] = []
-    if isinstance(res, str):
-        img_pattern = r"((?:http|https)://\S+\.(?:jpg|jpeg|png|gif|bmp|webp))"
-        for msg in re.split(img_pattern, res):
-            if re.match(img_pattern, msg):
-                try:
-                    img = await download_image(msg)
-                    msgs.append(img)
-                except:
-                    logger.warning(f"{msg} 下载出错！")
-            else:
-                msgs.append(msg)
-    elif isinstance(res, bytes):
-        msgs.append(res)
+    for shindan in shindan_manager.shindan_list:
+        matcher = on_alconna(
+            Alconna(shindan.command, Args["name?", str]["at?", At]),
+            block=True,
+            priority=14,
+        )
+        matcher.append_handler(shindan_handler(shindan))
+        shindan_matchers.append(matcher)
 
-    if not msgs:
-        await sd_matcher.finish()
 
-    if isinstance(bot, V11Bot):
-        message = V11Msg()
-        for msg in msgs:
-            if isinstance(msg, bytes):
-                message.append(V11MsgSeg.image(msg))
-            else:
-                message.append(msg)
-    else:
-        message = V12Msg()
-        for msg in msgs:
-            if isinstance(msg, bytes):
-                resp = await bot.upload_file(type="data", name="shindan", data=msg)
-                file_id = resp["file_id"]
-                message.append(V12MsgSeg.image(file_id))
-            else:
-                message.append(msg)
-    await sd_matcher.finish(message)
+driver = get_driver()
+
+
+@driver.on_startup
+async def _():
+    await shindan_manager.load_shindan()
+    refresh_matchers()
