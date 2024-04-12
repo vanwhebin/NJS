@@ -1,58 +1,57 @@
-from re import search
-
+from nonebot import require
 from nonebot.log import logger
 from nonebot.matcher import Matcher
-from nonebot import get_driver, on_keyword
-from nonebot.adapters.onebot.v11 import MessageEvent, MessageSegment
+from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 
-from .config import Config
+require("nonebot_plugin_alconna")
+require("nonebot_plugin_htmlrender")
+
+from nonebot_plugin_alconna import Alconna, Args, UniMessage, on_alconna
+
+from .config import DEBUG, QWEATHER_APIKEY, QWEATHER_APITYPE, Config
 from .render_pic import render
-from .weather_data import Weather, ConfigError, CityNotFoundError
+from .weather_data import CityNotFoundError, ConfigError, Weather
 
-plugin_config = Config.parse_obj(get_driver().config.dict())
+__plugin_meta__ = PluginMetadata(
+    name="和风天气",
+    description="和风天气图片显示插件",
+    usage="天气地名 / 地名天气",
+    type="application",
+    homepage="https://github.com/kexue-z/nonebot-plugin-heweather",
+    config=Config,
+    supported_adapters=inherit_supported_adapters("nonebot_plugin_alconna"),
+)
 
-if plugin_config.qweather_apikey and plugin_config.qweather_apitype:
-    api_key = plugin_config.qweather_apikey
-    api_type = int(plugin_config.qweather_apitype)
-else:
-    raise ConfigError("请设置 qweather_apikey 和 qweather_apitype")
 
-
-if plugin_config.debug:
-    DEBUG = True
+if DEBUG:
     logger.debug("将会保存图片到 weather.png")
-else:
-    DEBUG = False
 
 
-weather = on_keyword({"天气"}, priority=1)
+weather = on_alconna(Alconna("天气", Args["city", str]), block=True, priority=1)
+weather.shortcut(r"^(?P<city>.+)天气$", {"args": ["{city}"], "fuzzy": False})
+weather.shortcut(r"^天气(?P<city>.+)$", {"args": ["{city}"], "fuzzy": False})
 
 
 @weather.handle()
-async def _(matcher: Matcher, event: MessageEvent):
-    city = ""
-    if args := event.get_plaintext().split("天气"):
-        city = args[0].strip() or args[1].strip()
-        if not city:
-            await weather.finish("地点是...空气吗?? >_<")
-
-        # 判断指令前后是否都有内容，如果是则结束，否则跳过。
-        if (args[0].strip() == "") == (args[1].strip() == ""):
-            await weather.finish()
+async def _(matcher: Matcher, city: str):
     await weather.send("少女观星中...", at_sender=True)
-    w_data = Weather(city_name=city, api_key=api_key, api_type=api_type)
+    if QWEATHER_APIKEY is None or QWEATHER_APITYPE is None:
+        raise ConfigError("请设置 qweather_apikey 和 qweather_apitype")
+
+    w_data = Weather(city_name=city, api_key=QWEATHER_APIKEY, api_type=QWEATHER_APITYPE)
     try:
         await w_data.load_data()
     except CityNotFoundError:
+        logger.warning(f"找不到城市: {city}")
         matcher.block = False
-        await weather.finish(f"未查询到{city}的天气哦~", at_sender=True)
+        await matcher.finish()
 
     img = await render(w_data)
 
     if DEBUG:
         debug_save_img(img)
 
-    await weather.finish(MessageSegment.image(img))
+    await UniMessage.image(raw=img).send()
 
 
 def debug_save_img(img: bytes) -> None:
