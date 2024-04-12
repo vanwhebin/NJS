@@ -53,7 +53,7 @@ class ConfigModel(BaseModel):
     browser_type: Literal["chromium", "firefox", "webkit"] = Field("chromium", alias="浏览器内核")
 
     # 早报60s
-    morning_news: str = Field("https://api.vvhan.com/api/60s", alias="早报60s")
+    morning_news: str = Field("http://api.suxun.site/api/sixs", alias="早报60s")
 
     github_proxy: str = Field("https://github.cherishmoon.fun/", alias="github资源地址")
 
