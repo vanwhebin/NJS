@@ -46,9 +46,7 @@ _flmt = FreqLimiter(3)
 __bot_version__ = "1.0.6"
 
 bot_get_random_pic = on_fullmatch("wws 随机表情包", block=True, priority=5)
-bot_update = on_fullmatch(
-    "wws 更新Hikari", priority=5, block=True, permission=SUPERUSER
-)
+bot_update = on_fullmatch("wws 更新Hikari", priority=5, block=True, permission=SUPERUSER)
 bot = on_command("wws", block=False, aliases={"WWS"}, priority=54)
 bot_pupu = on_fullmatch("噗噗", block=False, priority=5)
 bot_listen = on_message(priority=5, block=False)
@@ -72,20 +70,12 @@ SecletProcess = defaultdict(lambda: SlectState(False, None, None))
 
 
 @bot.handle()
-async def main(
-    bot: Bot, ev: MessageEvent, matchmsg: Message = CommandArg()
-):  # noqa: B008, PLR0915
+async def main(bot: Bot, ev: MessageEvent, matchmsg: Message = CommandArg()):  # noqa: B008, PLR0915
     try:
         server_type = None
-        if isinstance(ev, PrivateMessageEvent) and (
-            driver.config.private or str(ev.user_id) in driver.config.superusers
-        ):  # 私聊事件,superusers默认不受影响
+        if isinstance(ev, PrivateMessageEvent) and (driver.config.private or str(ev.user_id) in driver.config.superusers):  # 私聊事件,superusers默认不受影响
             server_type = "QQ"
-        elif (
-            isinstance(ev, GroupMessageEvent)
-            and driver.config.group
-            and ev.group_id not in driver.config.ban_group_list
-        ):  # 群聊事件
+        elif isinstance(ev, GroupMessageEvent) and driver.config.group and ev.group_id not in driver.config.ban_group_list:  # 群聊事件
             server_type = "QQ"
         elif isinstance(ev, GuildMessageEvent) and driver.config.channel:  # 频道事件
             if driver.config.all_channel or ev.channel_id in driver.config.channel_list:
@@ -109,16 +99,12 @@ async def main(
         superuser_command_list = ["重置监控"]
         adminuser_command_list = ["添加监控", "删除监控"]
         for each in superuser_command_list:
-            if (each in str(ev.message) or each in matchmsg) and str(
-                qqid
-            ) not in driver.config.superusers:
+            if (each in str(ev.message) or each in matchmsg) and str(qqid) not in driver.config.superusers:
                 await bot.send(ev, "该命令仅限超级管理员使用")
                 return
         if str(qqid) not in driver.config.superusers:
             for each in adminuser_command_list:
-                if (
-                    each in str(ev.message) or each in matchmsg
-                ) and qqid not in driver.config.admin_list:
+                if (each in str(ev.message) or each in matchmsg) and qqid not in driver.config.admin_list:
                     await bot.send(ev, "请联系机器人搭建者添加权限")
                     return
         hikari = await init_hikari(
@@ -155,9 +141,7 @@ async def main(
         return False
     except Exception:
         logger.error(traceback.format_exc())
-        await bot.send(
-            ev, "呜呜呜发生了错误，可能是网络问题，如果过段时间不能恢复请联系麻麻哦~"
-        )
+        await bot.send(ev, "呜呜呜发生了错误，可能是网络问题，如果过段时间不能恢复请联系麻麻哦~")
 
 
 @bot_listen.handle()
@@ -179,9 +163,7 @@ async def change_select_state(bot: Bot, ev: MessageEvent):
 
 
 async def wait_to_select(hikari):
-    SecletProcess[hikari.UserInfo.PlatformId] = SlectState(
-        True, None, hikari.Input.Select_Data
-    )
+    SecletProcess[hikari.UserInfo.PlatformId] = SlectState(True, None, hikari.Input.Select_Data)
     a = 0
     while a < 40 and not SecletProcess[hikari.UserInfo.PlatformId].SlectIndex:
         a += 1
@@ -200,9 +182,7 @@ async def OCR_listen(bot: Bot, ev: MessageEvent):
     try:
         if not driver.config.ocr_on:
             return
-        if not (
-            str(ev.message).find("[CQ:image") + 1
-        ):  # 判断收到的信息是否为图片，不是就退出
+        if not (str(ev.message).find("[CQ:image") + 1):  # 判断收到的信息是否为图片，不是就退出
             return
         tencent_url = ""
         for seg in ev.message:
@@ -232,9 +212,7 @@ async def send_random_ocr_image(bot: Bot, ev: MessageEvent):
             await bot.send(ev, str(img))
     except Exception:
         logger.error(traceback.format_exc())
-        await bot.send(
-            ev, "呜呜呜发生了错误，可能是网络问题，如果过段时间不能恢复请联系麻麻哦~"
-        )
+        await bot.send(ev, "呜呜呜发生了错误，可能是网络问题，如果过段时间不能恢复请联系麻麻哦~")
         return
 
 
@@ -257,15 +235,9 @@ async def update_Hikari(ev: MessageEvent, bot: Bot):
             #    *[download(each["url"], f"{driver.config.nb2_path}\{each['name']}") for each in nb2_file]
             # )
         logger.info(f"当前解释器路径{sys.executable}")
-        os.system(
-            f"{sys.executable} -m pip install hikari-bot -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade"
-        )
-        os.system(
-            f"{sys.executable} -m pip install hikari-core -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade"
-        )
-        os.system(
-            f"{sys.executable} -m pip install nonebot-plugin-gocqhttp -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade"
-        )
+        os.system(f"{sys.executable} -m pip install hikari-bot -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade")
+        os.system(f"{sys.executable} -m pip install hikari-core -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade")
+        os.system(f"{sys.executable} -m pip install nonebot-plugin-gocqhttp -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade")
         Reloader.reload(delay=1)
     except RuntimeError:
         if str(platform.system()).lower() == "linux":
@@ -278,20 +250,14 @@ async def update_Hikari(ev: MessageEvent, bot: Bot):
                 # not compatible with cmdline with '\n'
                 os.execv(
                     os.readlink("/proc/self/exe"),
-                    open("/proc/self/cmdline", "rb")
-                    .read()
-                    .replace(b"\0", b"\n")
-                    .decode()
-                    .split("\n")[:-1],
+                    open("/proc/self/cmdline", "rb").read().replace(b"\0", b"\n").decode().split("\n")[:-1],
                 )
             except Exception:
                 logger.error(traceback.format_exc())
                 await bot.send(ev, "自动更新失败了QAQ，请登录服务器查看具体报错日志")
         else:
             logger.error(traceback.format_exc())
-            await bot.send(
-                ev, "不支持nb run启动的方式更新哦，请使用python bot.py 启动Hikari"
-            )
+            await bot.send(ev, "不支持nb run启动的方式更新哦，请使用python bot.py 启动Hikari")
     except Exception:
         logger.error(traceback.format_exc())
         await bot.send(ev, "自动更新失败了QAQ，请登录服务器查看具体报错日志")
@@ -325,12 +291,13 @@ async def startup_download(url, name):
 
 
 async def job_chech_version():
-    bot = get_bot()
+    # bot = get_bot()
     hikari = Hikari_Model()
     hikari = await check_version(hikari)
     superid = driver.config.superusers
     for each in superid:
-        await bot.send_private_msg(user_id=int(each), message=hikari.Output.Data)
+        # await bot.send_private_msg(user_id=int(each), message=hikari.Output.Data)
+        logger.info(hikari.Output.Data)
 
 
 async def job_listen_battle():
@@ -345,20 +312,13 @@ async def job_listen_battle():
 scheduler.add_job(job_chech_version, "cron", hour=12)
 scheduler.add_job(startup, "cron", hour=4)
 scheduler.add_job(downlod_OcrResult, "interval", minutes=10)
-scheduler.add_job(
-    job_listen_battle, "interval", minutes=driver.config.battle_listen_time
-)
+scheduler.add_job(job_listen_battle, "interval", minutes=driver.config.battle_listen_time)
 
 
 @bot_pupu.handle()
 async def send_pupu_msg(ev: MessageEvent, bot: Bot):
     try:
-        if (
-            driver.config.pupu
-            and isinstance(ev, GroupMessageEvent)
-            and driver.config.group
-            and ev.group_id not in driver.config.ban_group_list
-        ):
+        if driver.config.pupu and isinstance(ev, GroupMessageEvent) and driver.config.group and ev.group_id not in driver.config.ban_group_list:
             msg = await get_pupu_msg()
             await bot.send(ev, msg)
     except ActionFailed:
