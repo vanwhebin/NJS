@@ -9,10 +9,10 @@ from nonebot import get_driver
 try:
     api = loads(get_driver().config.json())["realesrgan_api"]
 except:
-    api = 'https://hf.space/embed/ppxxxg22/Real-ESRGAN/api/predict/'
+    api = 'https://akhaliq-real-esrgan.hf.space/api/predict/'
 
 real_esrgan = on_command(
-    "重建", aliases={"超分", "real-esrgan", "超分辨率重建", "esrgan", "real_esrgan"}, priority=30, block=True
+    "重建", aliases={"real-esrgan", "超分辨率重建", "esrgan", "real_esrgan"}, priority=30
 )
 
 
@@ -28,7 +28,7 @@ async def real_esrgan_handle_first(
         if seg.type == "text":
             state["mode"] = seg.data["text"].strip()
         if seg.type == "image":
-            state['img'] = seg
+            state['img'] = event.message['image']
             break
 
 
