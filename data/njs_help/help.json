@@ -250,7 +250,7 @@
         {
             "插件名": "碧蓝档案wiki",
             "导包名": "nonebot_plugin_bawiki",
-            "显示颜色": "红色",
+            "显示颜色": "绿色",
             "帮助文字": "",
             "帮助图片": "",
             "帮助文档": "./data/njs_help/nonebot_plugin_bawiki/help.md",
