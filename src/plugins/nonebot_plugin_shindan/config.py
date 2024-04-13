@@ -1,9 +1,5 @@
-from nonebot import get_plugin_config
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 
-class Config(BaseModel):
+class Config(BaseModel, extra=Extra.ignore):
     shindanmaker_cookie: str = ""
-
-
-shindan_config = get_plugin_config(Config)
