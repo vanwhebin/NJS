@@ -1,52 +1,39 @@
-import json
-from pathlib import Path
 from typing import Optional
+from typing_extensions import Annotated
 
-from nonebot import get_available_plugin_names, get_driver, logger
-from pil_utils.fonts import get_proper_font
-from pydantic import BaseModel, validator
+from nonebot import get_plugin_config
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class Cfg(BaseModel):
     ba_proxy: Optional[str] = None
+    ba_shittim_proxy: Optional[str] = None
     ba_gacha_cool_down: int = 0
+    ba_voice_use_card: bool = False
+    ba_use_forward_msg: bool = True
+    ba_screenshot_timeout: int = 60
+    ba_disable_classic_gacha: bool = False
+    ba_gacha_max: int = 200
+    ba_illegal_limit: int = 3
+    ba_arona_set_alias_only_su: bool = False
 
-    ba_gamekee_url = "https://ba.gamekee.com/"
-    ba_schale_url = "https://schale.lgc.cyberczy.xyz/"
-    ba_schale_mirror_url = "https://schale.lgc.cyberczy.xyz/"
-    ba_bawiki_db_url = "https://bawiki.lgc.cyberczy.xyz/"
+    ba_gamekee_url: Annotated[str, HttpUrl] = Field("https://ba.gamekee.com/")
+    ba_schale_url: Annotated[str, HttpUrl] = Field("https://schale.gg/")
+    ba_bawiki_db_url: Annotated[str, HttpUrl] = Field("https://bawiki.lgc2333.top/")
+    ba_arona_api_url: Annotated[str, HttpUrl] = Field("https://arona.diyigemt.com/")
+    ba_arona_cdn_url: Annotated[str, HttpUrl] = Field("https://arona.cdn.diyigemt.com/")
+    ba_shittim_url: Annotated[str, HttpUrl] = Field("https://arona.icu/")
+    ba_shittim_api_url: Annotated[str, HttpUrl] = Field("https://api.arona.icu/")
+    ba_shittim_data_url: Annotated[str, HttpUrl] = Field("https://data.ba.benx1n.com/")
 
-    @validator("ba_gamekee_url", allow_reuse=True)  # type: ignore
-    @validator("ba_schale_url", allow_reuse=True)  # type: ignore
-    @validator("ba_schale_mirror_url", allow_reuse=True)  # type: ignore
-    @validator("ba_bawiki_db_url", allow_reuse=True)  # type: ignore
-    def _(cls, val: str):  # noqa: N805
-        if not ((val.startswith(("https://", "http://"))) and val.endswith("/")):
-            raise ValueError('自定义的 URL 请以 "http(s)://" 开头，以 "/" 结尾')
+    ba_shittim_key: Optional[str] = None
+    ba_shittim_request_delay: float = 0
 
-
-config = Cfg.parse_obj(get_driver().config.dict())
-
-
-# 给 PicMenu 用户上个默认字体
-def set_pic_menu_font():
-    pic_menu_dir = Path.cwd() / "menu_config"
-    pic_menu_config = pic_menu_dir / "config.json"
-
-    if not pic_menu_dir.exists():
-        pic_menu_dir.mkdir(parents=True)
-
-    if (not pic_menu_config.exists()) or (
-        json.loads(pic_menu_config.read_text(encoding="u8")).get("default")
-        == "font_path"
-    ):
-        path = str(get_proper_font("国").path.resolve())
-        pic_menu_config.write_text(json.dumps({"default": path}), encoding="u8")
-        logger.info("检测到 PicMenu 已加载并且未配置字体，已自动帮您配置系统字体")
+    ba_req_retry: int = 1
+    ba_req_cache_ttl: int = 10800  # 3 hrs
+    ba_shittim_req_cache_ttl: int = 600  # 10 mins
+    ba_req_timeout: Optional[float] = 10.0
+    ba_auto_clear_cache_path: bool = False
 
 
-if "nonebot_plugin_PicMenu" in get_available_plugin_names():
-    try:
-        set_pic_menu_font()
-    except:
-        logger.exception("配置 PicMenu 字体失败")
+config = get_plugin_config(Cfg)
