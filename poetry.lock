@@ -2687,37 +2687,6 @@ pydantic = ">=1.10.0,<2.5.0 || >2.5.0,<2.5.1 || >2.5.1,<3.0.0"
 typing-extensions = ">=4.0.0"
 
 [[package]]
-name = "nonebot-plugin-orm"
-version = "0.7.1"
-description = "SQLAlchemy ORM support for nonebot"
-optional = false
-python-versions = "<4.0,>=3.8"
-files = [
-    {file = "nonebot_plugin_orm-0.7.1-py3-none-any.whl", hash = "sha256:8e663094b0521a4838a4f7e65d53b603bfc5da77bafe9a89c912385918efb569"},
-    {file = "nonebot_plugin_orm-0.7.1.tar.gz", hash = "sha256:e6ae8f93e7e2a0f3de40a4f3dbfd48684654468aea1ea3ca31009fa5aaff42d8"},
-]
-
-[package.dependencies]
-alembic = ">=1.13,<2.0"
-click = ">=8.1,<9.0"
-importlib-resources = {version = ">=6.1,<7.0", markers = "python_version < \"3.12\""}
-nonebot-plugin-localstore = ">=0.6,<1.0"
-nonebot2 = ">=2.2,<3.0"
-sqlalchemy = ">=2.0,<3.0"
-typing-extensions = {version = ">=4.9,<5.0", markers = "python_version < \"3.11\""}
-
-[package.extras]
-aiomysql = ["sqlalchemy[aiomysql]"]
-aiosqlite = ["sqlalchemy[aiosqlite]"]
-asyncmy = ["sqlalchemy[asyncmy]"]
-asyncpg = ["sqlalchemy[postgresql-asyncpg]"]
-default = ["sqlalchemy[aiosqlite]"]
-mysql = ["sqlalchemy[aiomysql]"]
-postgresql = ["sqlalchemy[postgresql-psycopgbinary]"]
-psycopg = ["sqlalchemy[postgresql-psycopgbinary]"]
-sqlite = ["sqlalchemy[aiosqlite]"]
-
-[[package]]
 name = "nonebot-plugin-send-anything-anywhere"
 version = "0.5.0"
 description = "An adaptor for nonebot2 adaptors"
@@ -5777,4 +5746,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "cc44e610f197921fb5474457e03dd6593e0f089aac762a8f5a81cf015a83e631"
+content-hash = "acfe3e1a12b0516ddf187cbeb223d854ee7f9eaf06b202f2e5f9249da6007ceb"
