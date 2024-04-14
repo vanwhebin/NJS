@@ -16,3 +16,17 @@
 ```
 
 ![img](https://github.com/zhulinyv/nonebot_plugin_nai3/raw/main/img/1.png)
+
+```
+指令: nai3黑名单/黑名单(需要超级用户, 群主或群管理员权限)
+参数:
+    添加    添加黑名单
+    删除    删除黑名单
+    用户    指定添加类型
+    群聊    指定添加类型
+    群号/QQ号/@sb.
+示例: nai3黑名单添加用户 @脑积水
+返回: 
+```
+
+![img](https://github.com/zhulinyv/nonebot_plugin_nai3/raw/main/img/2.png)
