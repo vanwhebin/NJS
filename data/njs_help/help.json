@@ -908,9 +908,9 @@
             "插件名": "ChatGPT",
             "导包名": "nonebot_plugin_chatgpt_plus",
             "显示颜色": "红色",
-            "帮助文字": "./data/njs_help/nonebot_plugin_chatgpt_plus/help.md",
+            "帮助文字": "",
             "帮助图片": "",
-            "帮助文档": "",
+            "帮助文档": "./data/njs_help/nonebot_plugin_chatgpt_plus/help.md",
             "BBcode": ""
         },
         {
@@ -937,7 +937,7 @@
             "显示颜色": "绿色",
             "帮助文字": "",
             "帮助图片": "",
-            "帮助文档": "",
+            "帮助文档": "./data/njs_help/nonebot_plugin_nai3/help.md",
             "BBcode": ""
         }
     ]
