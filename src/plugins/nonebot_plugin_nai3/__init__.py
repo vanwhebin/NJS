@@ -87,9 +87,11 @@ async def _(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs())
     try:
         cd[gid]["user"][uid]["limit"]
     except KeyError:
-        cd[gid] = {"cool_time": now_time - nai3_config.nai3_cooltime_group, "user": {uid: {"limit": nai3_config.nai3_limit, "cool_time": now_time - nai3_config.nai3_cooltime_user}}}
+        cd[gid] = {"cool_time": now_time - nai3_config.nai3_cooltime_group, "user": {uid: {"limit": 999 if event.get_user_id() in bot.config.superusers else nai3_config.nai3_limit, "cool_time": now_time - nai3_config.nai3_cooltime_user}}}
 
     if event.get_user_id() not in bot.config.superusers:
+        logger.debug(event.get_user_id())
+        logger.debug(bot.config.superusers)
         if now_time - cd[gid]["cool_time"] < nai3_config.nai3_cooltime_group:
             await nai3.finish("群聊绘画冷却中, 剩余时间: {}...".format(round(nai3_config.nai3_cooltime_group - now_time + cd[gid]["cool_time"], 3)), at_sender=True)
         if now_time - cd[gid]["user"][uid]["cool_time"] < nai3_config.nai3_cooltime_user:
